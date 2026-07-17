@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Notes — a focus journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E8EBE1;
+    --paper: #F4F5EC;
+    --ink: #1E2A20;
+    --ink-soft: #5B6459;
+    --moss: #3F6B4F;
+    --moss-deep: #2C4E37;
+    --amber: #C4832E;
+    --amber-soft: #EFDBB9;
+    --blue: #5C7A93;
+    --border: #D6D9C6;
+    --card: #FFFFFF;
+    --shadow: rgba(30, 42, 32, 0.08);
+    --danger: #B5473A;
+    --wilt: #9AA192;
+  }
+  body.dark {
+    --bg: #10140F;
+    --paper: #171D14;
+    --ink: #E8ECDF;
+    --ink-soft: #97A18C;
+    --moss: #74A87F;
+    --moss-deep: #4C7C58;
+    --amber: #E3A75C;
+    --amber-soft: #3A2E1B;
+    --blue: #7FA0B8;
+    --border: #2A3324;
+    --card: #1D2418;
+    --shadow: rgba(0, 0, 0, 0.35);
+    --danger: #D77A6B;
+    --wilt: #576050;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1.25rem;
+    transition: background .3s ease, color .3s ease;
+  }
+
+  .app { width: 100%; max-width: 980px; }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.1rem;
+  }
+  .brand-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--moss);
+    margin-bottom: 0.35rem;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 2.1rem;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--moss); font-weight: 400; }
+
+  .header-controls {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .theme-toggle {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: border-color .2s;
+  }
+  .theme-toggle:hover { border-color: var(--moss); color: var(--ink); }
+  .theme-toggle svg { width: 13px; height: 13px; }
+
+  .clear-data-btn {
+    background: var(--card);
+    border: 1px solid var(--danger);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    color: var(--danger);
+    transition: border-color .2s, background .2s;
+  }
+  .clear-data-btn:hover { border-color: var(--danger); background: rgba(181, 71, 58, 0.08); }
+
+  /* ---------- layout ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: 0.95fr 1.15fr;
+    gap: 1.6rem;
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1.4rem;
+    box-shadow: 0 10px 30px -18px var(--shadow);
+    padding: 1.7rem;
+  }
+
+  .panel-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1.3rem;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  /* ---------- timer panel ---------- */
+  .session-pill {
+    background: var(--amber-soft);
+    color: var(--amber);
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+  }
+
+  .timer-display {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 3.6rem;
+    text-align: center;
+    letter-spacing: 0.03em;
+    margin: 0.4rem 0 0.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* the growing plant — signature element */
+  .plant-stage {
+    width: 100%;
+    max-width: 220px;
+    margin: 0.3rem auto 0.4rem;
+    display: block;
+  }
+  .plant-stage .grp { transition: opacity .5s ease; }
+  .stem-path { stroke: var(--moss-deep); stroke-width: 4; fill: none; stroke-linecap: round; transition: d .6s ease, stroke .4s ease; }
+  .leaf { fill: var(--moss); transition: opacity .5s ease, transform .5s ease; transform-origin: center; }
+  .bloom-petal { fill: var(--amber); }
+  .pot-body { fill: var(--ink-soft); opacity: 0.85; }
+  .soil { fill: var(--moss-deep); opacity: 0.6; }
+
+  .focus-caption {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-row { display: flex; gap: 0.55rem; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.86rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: scale(0.96); }
+  .btn-start { background: var(--moss); border-color: var(--moss); color: #fff; }
+  .btn-stop { background: var(--card); color: var(--danger); border-color: var(--danger); }
+  .btn-reset { color: var(--ink-soft); }
+
+  .hint {
+    text-align: center;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    margin-top: 0.9rem;
+  }
+
+  /* ---------- dashboard panel ---------- */
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--amber-soft);
+    color: var(--amber);
+    padding: 0.3rem 0.85rem 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .streak-badge svg { width: 15px; height: 15px; }
+
+  .target-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+    flex-wrap: wrap;
+  }
+  .target-row label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  select#targetSelect {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.82rem;
+    outline: none;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--paper);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 1.4rem;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--moss);
+    width: 0%;
+    transition: width .4s ease;
+  }
+
+  .chart-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+  .chart-wrap {
+    background: var(--paper);
+    border: 1px dashed var(--border);
+    border-radius: 1rem;
+    padding: 0.6rem 0.5rem 0.3rem;
+    height: 110px;
+  }
+  #lineChart { width: 100%; height: 100%; display: block; }
+  .chart-labels {
+    display: flex;
+    justify-content: space-around;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--ink-soft);
+    margin-top: 0.35rem;
+  }
+
+  ::selection { background: var(--amber-soft); color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <div class="brand-eyebrow">a study companion</div>
+      <h1>Field <em>Notes</em></h1>
+    </div>
+    <div class="header-controls">
+      <button class="clear-data-btn" id="clearDataBtn" title="Clear all data">clear data</button>
+      <button class="theme-toggle" id="themeToggle">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="themeLabel">dark mode</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- TIMER PANEL -->
+    <div class="panel">
+      <div class="panel-label">
+        <span>session timer</span>
+        <span class="session-pill" id="sessionPill">idle</span>
+      </div>
+
+      <div class="timer-display" id="timerDisplay">00:00</div>
+
+      <svg class="plant-stage" id="plantSvg" viewBox="0 0 160 190">
+        <ellipse class="soil" cx="80" cy="164" rx="26" ry="6"/>
+        <path class="pot-body" d="M54 164 L106 164 L100 186 L60 186 Z"/>
+        <path class="stem-path" id="stemPath" d="M80 164 Q79 152 80 148"/>
+        <g class="grp" id="leafGrpA" style="opacity:0">
+          <ellipse class="leaf" cx="68" cy="140" rx="11" ry="6" transform="rotate(-28 68 140)"/>
+          <ellipse class="leaf" cx="92" cy="140" rx="11" ry="6" transform="rotate(28 92 140)"/>
+        </g>
+        <g class="grp" id="leafGrpB" style="opacity:0">
+          <ellipse class="leaf" cx="62" cy="115" rx="13" ry="7" transform="rotate(-22 62 115)"/>
+          <ellipse class="leaf" cx="98" cy="115" rx="13" ry="7" transform="rotate(22 98 115)"/>
+        </g>
+        <g class="grp" id="bloomGrp" style="opacity:0">
+          <circle class="bloom-petal" cx="80" cy="96" r="7"/>
+          <circle class="bloom-petal" cx="70" cy="102" r="6"/>
+          <circle class="bloom-petal" cx="90" cy="102" r="6"/>
+          <circle class="bloom-petal" cx="80" cy="108" r="6"/>
+          <circle cx="80" cy="102" r="4" fill="var(--ink-soft)" opacity="0.5"/>
+        </g>
+      </svg>
+      <div class="focus-caption" id="focusCaption">a seed, waiting</div>
+
+      <div class="btn-row">
+        <button class="btn btn-start" id="startBtn">start</button>
+        <button class="btn btn-stop" id="stopBtn">pause</button>
+        <button class="btn btn-reset" id="resetBtn">reset</button>
+      </div>
+      <div class="hint">stay on task and the plant grows — drift, and it wilts</div>
+    </div>
+
+    <!-- DASHBOARD PANEL -->
+    <div class="panel">
+      <div class="panel-label">
+        <span>dashboard</span>
+        <span class="streak-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-2 4-2 7a3 3 0 006 0c1 2 1 4 0 6a6 6 0 01-11 0c-1-3 0-5 2-7 0 2 1 2 2 1-1-2-1-5 3-7z"/></svg>
+          <span id="streakCount">0</span>&nbsp;day streak
+        </span>
+      </div>
+
+      <div class="target-row">
+        <label>daily target</label>
+        <select id="targetSelect">
+          <option value="1">1 hour</option>
+          <option value="2" selected>2 hours</option>
+          <option value="3">3 hours</option>
+          <option value="4">4 hours</option>
+          <option value="5">5 hours</option>
+        </select>
+        <span id="targetPct" style="font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--ink-soft);">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="chart-head">
+        <span>last 7 days</span>
+        <span>minutes focused</span>
+      </div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+      <div class="chart-labels" id="chartLabels"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'focus-field-notes-data';
+
+  // ---------- default state ----------
+  function defaultState() {
+    return {
+      daily: {},        // { "YYYY-MM-DD": minutes }
+      target: 2,         // hours
+      theme: 'light'
+    };
+  }
+  let state = defaultState();
+
+  // ---------- date helpers ----------
+  function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function keyDaysAgo(n) {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return dateKey(d);
+  }
+
+  // ---------- persistence using localStorage ----------
+  function loadState() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        state = Object.assign(defaultState(), parsed);
+      } else {
+        state = defaultState();
+      }
+    } catch (err) {
+      console.error('Could not load focus data:', err);
+      state = defaultState();
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      console.error('Could not save focus data:', err);
+    }
+  }
+
+  function saveStateSoon() {
+    clearTimeout(window.saveTimeout);
+    window.saveTimeout = setTimeout(() => {
+      saveState();
+    }, 300);
+  }
+
+  // ---------- DOM refs ----------
+  const timerDisplay = document.getElementById('timerDisplay');
+  const sessionPill = document.getElementById('sessionPill');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const focusCaption = document.getElementById('focusCaption');
+  const stemPath = document.getElementById('stemPath');
+  const leafGrpA = document.getElementById('leafGrpA');
+  const leafGrpB = document.getElementById('leafGrpB');
+  const bloomGrp = document.getElementById('bloomGrp');
+  const streakCountEl = document.getElementById('streakCount');
+  const targetSelect = document.getElementById('targetSelect');
+  const targetPctEl = document.getElementById('targetPct');
+  const progressFill = document.getElementById('progressFill');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+  const clearDataBtn = document.getElementById('clearDataBtn');
+  const canvas = document.getElementById('lineChart');
+  const ctx = canvas.getContext('2d');
+  const chartLabels = document.getElementById('chartLabels');
+
+  // ---------- timer / session state (not persisted mid-session) ----------
+  let timerSeconds = 0;
+  let isRunning = false;
+  let intervalId = null;
+  let focusLevel = 0.3;
+  let lastMinuteLogged = -1; // Track which minute was already logged
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  // ---------- growing plant ----------
+  function updatePlant() {
+    const level = focusLevel;
+    let stemD, caption;
+    if (level < 0.15) {
+      stemD = "M80 164 Q79 158 80 156";
+      caption = "a seed, waiting";
+      leafGrpA.style.opacity = 0;
+      leafGrpB.style.opacity = 0;
+      bloomGrp.style.opacity = 0;
+      stemPath.style.stroke = 'var(--wilt)';
+    } else if (level < 0.4) {
+      stemD = "M80 164 Q78 150 80 142";
+      caption = "just sprouting";
+      leafGrpA.style.opacity = 0;
+      leafGrpB.style.opacity = 0;
+      bloomGrp.style.opacity = 0;
+      stemPath.style.stroke = 'var(--moss-deep)';
+    } else if (level < 0.65) {
+      stemD = "M80 164 Q76 148 74 132 Q78 136 80 138";
+      caption = "settling in";
+      leafGrpA.style.opacity = 1;
+      leafGrpB.style.opacity = 0;
+      bloomGrp.style.opacity = 0;
+      stemPath.style.stroke = 'var(--moss-deep)';
+    } else if (level < 0.88) {
+      stemD = "M80 164 Q74 140 72 112 Q76 116 80 114";
+      caption = "deep in it now";
+      leafGrpA.style.opacity = 1;
+      leafGrpB.style.opacity = 1;
+      bloomGrp.style.opacity = 0;
+      stemPath.style.stroke = 'var(--moss)';
+    } else {
+      stemD = "M80 164 Q72 136 80 100";
+      caption = "in full bloom";
+      leafGrpA.style.opacity = 1;
+      leafGrpB.style.opacity = 1;
+      bloomGrp.style.opacity = 1;
+      stemPath.style.stroke = 'var(--moss)';
+    }
+    stemPath.setAttribute('d', stemD);
+    focusCaption.textContent = caption;
+  }
+
+  // ---------- line chart ----------
+  function drawChart() {
+    const w = canvas.parentElement.clientWidth - 6;
+    const h = canvas.parentElement.clientHeight - 6;
+    canvas.width = w;
+    canvas.height = h;
+    ctx.clearRect(0, 0, w, h);
+
+    const data = [];
+    for (let i = 6; i >= 0; i--) data.push(state.daily[keyDaysAgo(i)] || 0);
+    const maxVal = Math.max(...data, 1);
+    const pad = 10;
+    const cw = w - pad * 2;
+    const ch = h - pad * 2;
+
+    const isDark = document.body.classList.contains('dark');
+    const lineColor = isDark ? '#74A87F' : '#3F6B4F';
+    const fillColor = isDark ? 'rgba(116,168,127,0.18)' : 'rgba(63,107,79,0.14)';
+
+    const pts = data.map((v, i) => ({
+      x: pad + (i / (data.length - 1)) * cw,
+      y: pad + ch - (v / maxVal) * ch
+    }));
+
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pad + ch);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length - 1].x, pad + ch);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = lineColor;
+      ctx.fill();
+    });
+
+    chartLabels.innerHTML = '';
+    for (let i = 6; i >= 0; i--) {
+      const span = document.createElement('span');
+      span.textContent = i === 0 ? 'today' : `-${i}d`;
+      chartLabels.appendChild(span);
+    }
+  }
+
+  // ---------- streak (decays automatically on any missed day) ----------
+  function computeStreak() {
+    let streak = 0;
+    let i = 0;
+    // if today has no minutes yet, start counting from yesterday
+    if (!(state.daily[keyDaysAgo(0)] > 0)) i = 1;
+    while ((state.daily[keyDaysAgo(i)] || 0) > 0) {
+      streak++;
+      i++;
+    }
+    return streak;
+  }
+
+  // ---------- dashboard refresh ----------
+  function refreshDashboard() {
+    const today = state.daily[keyDaysAgo(0)] || 0;
+
+    streakCountEl.textContent = computeStreak();
+
+    const targetMin = state.target * 60;
+    const pct = targetMin > 0 ? Math.min(100, (today / targetMin) * 100) : 0;
+    targetPctEl.textContent = `${Math.round(pct)}%`;
+    progressFill.style.width = `${pct}%`;
+
+    drawChart();
+  }
+
+  function addFocusMinute() {
+    const currentMinute = Math.floor(timerSeconds / 60);
+    // Only add minute if we've completed a new full minute and haven't logged it yet
+    if (currentMinute > lastMinuteLogged && currentMinute > 0) {
+      lastMinuteLogged = currentMinute;
+      const key = keyDaysAgo(0);
+      state.daily[key] = (state.daily[key] || 0) + 1;
+      saveState();
+      refreshDashboard();
+    }
+  }
+
+  // ---------- timer tick ----------
+  function tick() {
+    if (isRunning) {
+      timerSeconds++;
+      timerDisplay.textContent = formatTime(timerSeconds);
+      focusLevel = Math.min(1, focusLevel + 0.0015);
+      updatePlant();
+      addFocusMinute(); // Check every tick if a minute was completed
+    } else {
+      focusLevel = Math.max(0, focusLevel - 0.003);
+      updatePlant();
+    }
+  }
+
+  function startTimer() {
+    if (isRunning) return;
+    isRunning = true;
+    sessionPill.textContent = 'focusing';
+    if (!intervalId) intervalId = setInterval(tick, 1000);
+  }
+
+  function stopTimer() {
+    isRunning = false;
+    sessionPill.textContent = 'paused';
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(intervalId);
+    intervalId = null;
+    timerSeconds = 0;
+    lastMinuteLogged = -1;
+    focusLevel = 0.3;
+    timerDisplay.textContent = '00:00';
+    sessionPill.textContent = 'idle';
+    updatePlant();
+  }
+
+  function clearAllData() {
+    if (confirm('Are you sure? This will delete all your focus data permanently.')) {
+      state = defaultState();
+      lastMinuteLogged = -1;
+      timerSeconds = 0;
+      isRunning = false;
+      clearInterval(intervalId);
+      intervalId = null;
+      focusLevel = 0.3;
+      saveState();
+      resetTimer();
+      refreshDashboard();
+      alert('All data cleared!');
+    }
+  }
+
+  startBtn.addEventListener('click', startTimer);
+  stopBtn.addEventListener('click', stopTimer);
+  resetBtn.addEventListener('click', resetTimer);
+  clearDataBtn.addEventListener('click', clearAllData);
+
+  targetSelect.addEventListener('change', () => {
+    state.target = parseInt(targetSelect.value, 10);
+    saveState();
+    refreshDashboard();
+  });
+
+  themeToggle.addEventListener('click', () => {
+    const dark = document.body.classList.toggle('dark');
+    state.theme = dark ? 'dark' : 'light';
+    themeIcon.innerHTML = dark
+      ? '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>'
+      : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    themeLabel.textContent = dark ? 'light mode' : 'dark mode';
+    saveState();
+    drawChart();
+  });
+
+  new ResizeObserver(drawChart).observe(canvas.parentElement);
+
+  // ---------- init ----------
+  function init() {
+    loadState();
+    if (state.theme === 'dark') {
+      document.body.classList.add('dark');
+      themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>';
+      themeLabel.textContent = 'light mode';
+    }
+    targetSelect.value = String(state.target || 2);
+    updatePlant();
+    refreshDashboard();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
