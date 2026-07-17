@@ -35,10 +35,6 @@ Built using **HTML**, **CSS**, and **JavaScript**, the application stores all us
 
 That's it! No installation or dependencies required.
 
-## 📸 Preview
-
-> Add screenshots or a GIF of your application here.
-
 ## 📂 Project Structure
 
 ```
@@ -54,7 +50,6 @@ student-focus-tracker/
 
 - User authentication
 - Cloud data synchronization
-- Dark mode
 - Weekly & monthly analytics
 - Export study reports
 - Notifications and reminders
